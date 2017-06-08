@@ -51,7 +51,7 @@ trait PaymentFailureLambda extends Logging {
 
     } else {
       logger.info("Request from Zuora could not be authenticated")
-      outputForAPIGateway(outputStream, unauthorized)
+      outputForAPIGateway(outputStream, basicAuthFailed)
     }
   }
 

@@ -7,7 +7,7 @@ import play.api.libs.json.{ Json, Writes }
 
 object ResponseModels {
 
-  case class Headers(contentType: String = "application/json")
+  case class Headers(additionalHeaders: Map[String, String] = Map.empty)
 
   case class AutoCancelResponse(statusCode: String, headers: Headers, body: String)
 
@@ -16,9 +16,10 @@ object ResponseModels {
 object ResponseWriters {
 
   implicit val headersWrites = new Writes[Headers] {
-    def writes(headers: Headers) = Json.obj(
-      "Content-Type" -> headers.contentType
-    )
+    def writes(headers: Headers) = {
+      val params = if (!headers.additionalHeaders.contains("contentType")) headers.additionalHeaders + ("Content-Type" -> "application/json") else headers.additionalHeaders
+      Json.toJson(params)
+    }
   }
 
   implicit val responseWrites = new Writes[AutoCancelResponse] {
@@ -43,6 +44,8 @@ object APIGatewayResponse extends Logging {
   //TODO IF WE KEEP THE FAILURE EMAIL LAMBDAS HERE WE SHOULD RENAME THESE TO SOMETHING MORE GENERIC
   val successfulCancellation = AutoCancelResponse("200", new Headers, "Success")
   def noActionRequired(reason: String) = AutoCancelResponse("200", new Headers, s"Auto-cancellation is not required: $reason")
+
+  val basicAuthFailed = AutoCancelResponse("401", new Headers(Map("WWW-Authenticate" -> "Basic realm=\"Access\"")), "Credentials are missing or invalid")
 
   val unauthorized = AutoCancelResponse("401", new Headers, "Credentials are missing or invalid")
   val badRequest = AutoCancelResponse("400", new Headers, "Failure to parse XML successfully")

@@ -55,7 +55,8 @@ class LambdaTest extends FlatSpec with MockitoSugar {
     lambda.currentPlansForSubscription(upgradedSub) shouldBe \/-(List(activeSupporter))
   }
 
-  val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
+  //  val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
+  val missingCredentialsResponse = """{"statusCode":"401","headers":{"WWW-Authenticate":"Basic realm=\"Access\"","Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
   val successfulResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}"""
 
   "lambda" should "return error if credentials are missing" in {
@@ -78,7 +79,7 @@ class LambdaTest extends FlatSpec with MockitoSugar {
     responseString jsonMatches missingCredentialsResponse
   }
 
-  "lambda" should "return enqueue email and return success for a valid request" in {
+  "lambda" should "enqueue email and return success for a valid request" in {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
     val output = new ByteArrayOutputStream
